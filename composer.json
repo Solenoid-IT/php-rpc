@@ -1,0 +1,26 @@
+{
+    "name": "solenoid/rpc",
+    "description": "HTTP RPC library",
+    "type": "library",
+    "keywords": ["http","rpc","protocol"],
+    "homepage": "https://github.com/Solenoid-IT/php-rpc",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Pier Niccolò Giannelli",
+            "email": "pierniccologiannelli@gmail.com",
+            "homepage": "https://www.solenoid.it",
+            "role": "Full Stack Web Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.3",
+        "solenoid/http": "^1.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Solenoid\\RPC\\": "src",
+            "Solenoid\\HTTP\\": "src"
+        }
+    }
+}
