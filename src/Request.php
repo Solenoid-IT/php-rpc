@@ -8,14 +8,14 @@ namespace Solenoid\RPC;
 
 class Request extends \Solenoid\HTTP\Request
 {
-    public static string $action;
+    public static string  $action;
 
-    public static string $subject;
-    public static string $verb;
+    public static ?string $subject;
+    public static string  $verb;
 
-    public static array  $input;
+    public static array   $input;
 
-    public static bool   $valid;
+    public static bool    $valid;
 
 
 
