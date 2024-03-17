@@ -61,24 +61,6 @@ class Request extends \Solenoid\HTTP\Request
 
 
         // (Getting the value)
-        $action_parts = explode( '::', $action );
-
-        if ( count( $action_parts ) !== 2 )
-        {// Match failed
-            // (Setting the value)
-            self::$valid = false;
-
-
-
-            // Returning the value
-            return
-                Server::send( Response::create( 400, [], [ 'error' => [ 'message' => 'RPC :: Action format is not valid' ] ]) )
-            ;
-        }
-
-
-
-        // (Getting the value)
         $input = ( parent::$body === '' ) ? [] : json_decode( parent::$body, true );
 
         if ( $input === null )
@@ -99,10 +81,28 @@ class Request extends \Solenoid\HTTP\Request
         // (Getting the value)
         self::$action  = $action;
 
-        self::$subject = $action_parts[0];
-        self::$verb    = $action_parts[1];
 
-        self::$input   = $input;
+
+        // (Getting the value)
+        $action_parts = explode( '::', $action );
+
+        if ( count( $action_parts ) === 1 )
+        {// (There is only the verb)
+            // (Getting the values)
+            self::$subject = null;
+            self::$verb    = $action_parts[0];
+        }
+        else
+        {// (There are subject and verb)
+            // (Getting the values)
+            self::$subject = $action_parts[0];
+            self::$verb    = $action_parts[1];
+        }
+
+
+
+        // (Getting the value)
+        self::$input = $input;
 
 
 
