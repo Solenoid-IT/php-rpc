@@ -42,7 +42,7 @@ class Server
 
 
         // Printing the value
-        echo $response->data ? json_encode( $response->data ) : '';
+        echo $response->data === null ? '' : json_encode( $response->data );
 
 
 
