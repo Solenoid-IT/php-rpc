@@ -27,7 +27,7 @@ class Request extends \Solenoid\HTTP\Request
 
 
 
-        if ( parent::$method !== 'RPC' )
+        if ( $this->method !== 'RPC' )
         {// Match failed
             // (Setting the value)
             self::$valid = false;
@@ -43,7 +43,7 @@ class Request extends \Solenoid\HTTP\Request
 
 
         // (Getting the value)
-        $action = parent::$headers['Action'];
+        $action = $this->headers['Action'];
 
         if ( !isset( $action ) )
         {// Value not found
@@ -61,7 +61,7 @@ class Request extends \Solenoid\HTTP\Request
 
 
         // (Getting the value)
-        $input = ( parent::$body === '' ) ? [] : json_decode( parent::$body, true );
+        $input = ( $this->body === '' ) ? [] : json_decode( $this->body, true );
 
         if ( $input === null )
         {// (Unable to decode the body as JSON)
