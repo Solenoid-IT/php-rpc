@@ -110,17 +110,17 @@ class Request extends \Solenoid\HTTP\Request
         self::$valid = true;
     }
 
-    # Returns [Request]
+    # Returns [self]
     public static function read ()
     {
         // Returning the value
-        return new Request();
+        return new self();
     }
 
 
 
     # Returns [assoc]
-    public static function to_array ()
+    public function to_array ()
     {
         // Returning the value
         return
