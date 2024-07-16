@@ -6,24 +6,31 @@ namespace Solenoid\RPC;
 
 
 
+use \Solenoid\HTTP\Server;
+use \Solenoid\HTTP\Response;
+use \Solenoid\HTTP\Status;
+
+
+
 class Request extends \Solenoid\HTTP\Request
 {
-    public static string  $action;
+    private static self $instance;
 
-    public static ?string $subject;
-    public static string  $verb;
 
-    public static array   $input;
 
-    public static bool    $valid;
+    public static bool      $valid;
+
+    public static string    $subject;
+    public static string    $verb;
+    public static \stdClass $input;
 
 
 
     # Returns [self]
-    public function __construct ()
+    private function __construct ()
     {
-        // (Reading the request)
-        parent::read();
+        // (Calling the function)
+        parent::fetch();
 
 
 
@@ -36,7 +43,7 @@ class Request extends \Solenoid\HTTP\Request
 
             // Returning the value
             return
-                Server::send( Response::create( 400, [], [ 'error' => [ 'message' => 'RPC :: Method is not valid' ] ]) )
+                Server::send( new Response( new Status(400), [], [ 'error' => [ 'message' => 'RPC :: Method is not valid' ] ]) )
             ;
         }
 
@@ -54,14 +61,14 @@ class Request extends \Solenoid\HTTP\Request
 
             // Returning the value
             return
-                Server::send( Response::create( 400, [], [ 'error' => [ 'message' => 'RPC :: Action is required' ] ]) )
+                Server::send( new Response( new Status(400), [], [ 'error' => [ 'message' => 'RPC :: Action is required' ] ]) )
             ;
         }
 
 
 
         // (Getting the value)
-        $input = ( $this->body === '' ) ? [] : json_decode( $this->body, true );
+        $input = ( $this->body === '' ) ? [] : json_decode( $this->body );
 
         if ( $input === null )
         {// (Unable to decode the body as JSON)
@@ -72,14 +79,9 @@ class Request extends \Solenoid\HTTP\Request
 
             // Returning the value
             return
-                Server::send( Response::create( 400, [], [ 'error' => [ 'message' => 'RPC :: Request-Body format is not valid' ] ]) )
+                Server::send( new Response( new Status(400), [], [ 'error' => [ 'message' => 'RPC :: Request-Body format is not valid' ] ]) )
             ;
         }
-
-
-
-        // (Getting the value)
-        self::$action  = $action;
 
 
 
@@ -89,7 +91,7 @@ class Request extends \Solenoid\HTTP\Request
         if ( count( $action_parts ) === 1 )
         {// (There is only the verb)
             // (Getting the values)
-            self::$subject = null;
+            self::$subject = '';
             self::$verb    = $action_parts[0];
         }
         else
@@ -110,48 +112,35 @@ class Request extends \Solenoid\HTTP\Request
         self::$valid = true;
     }
 
+
+
     # Returns [self]
-    public static function read ()
+    public static function fetch ()
     {
+        if ( !isset( self::$instance ) )
+        {// Value not found
+            // (Getting the value)
+            self::$instance = new self();
+        }
+
+
+
         // Returning the value
-        return new self();
+        return self::$instance;
     }
 
 
 
-    # Returns [assoc]
-    public function to_array ()
-    {
-        // Returning the value
-        return
-            array_merge
-            (
-                parent::to_array(),
-
-                [
-                    'action'  => self::$action,
-
-                    'subject' => self::$subject,
-                    'verb'    => self::$verb,
-
-                    'input'   => self::$input,
-
-                    'valid'   => self::$valid
-                ]
-            )
-        ;
-    }
-
-
-    
     # Returns [string]
     public function __toString ()
     {
         // Returning the value
-        return json_encode( self::to_array() );
+        return json_encode( get_object_vars( $this ) );
     }
 
 
+
+    /*
 
     # Returns [void]
     public function __destruct ()
@@ -179,6 +168,8 @@ class Request extends \Solenoid\HTTP\Request
             Server::send( Response::create( 404, [], [ 'error' => [ 'message' => 'RPC :: Action not found' ] ] ) )
         ;
     }
+
+    */
 }
 
 
