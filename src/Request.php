@@ -18,11 +18,11 @@ class Request extends \Solenoid\HTTP\Request
 
 
 
-    public static bool       $valid;
+    public bool       $valid;
 
-    public static string     $subject;
-    public static string     $verb;
-    public static ?\stdClass $input;
+    public string     $subject;
+    public string     $verb;
+    public ?\stdClass $input;
 
 
 
@@ -37,7 +37,7 @@ class Request extends \Solenoid\HTTP\Request
         if ( $this->method !== 'RPC' )
         {// Match failed
             // (Setting the value)
-            self::$valid = false;
+            $this->valid = false;
 
 
 
@@ -55,7 +55,7 @@ class Request extends \Solenoid\HTTP\Request
         if ( !isset( $action ) )
         {// Value not found
             // (Setting the value)
-            self::$valid = false;
+            $this->valid = false;
 
 
 
@@ -70,19 +70,6 @@ class Request extends \Solenoid\HTTP\Request
         // (Getting the value)
         $input = ( $this->body === '' ) ? null : json_decode( $this->body );
 
-        if ( $input === null )
-        {// (Unable to decode the body as JSON)
-            // (Setting the value)
-            self::$valid = false;
-
-
-
-            // Returning the value
-            return
-                Server::send( new Response( new Status(400), [], [ 'error' => [ 'message' => 'RPC :: Request-Body format is not valid' ] ]) )
-            ;
-        }
-
 
 
         // (Getting the value)
@@ -91,25 +78,25 @@ class Request extends \Solenoid\HTTP\Request
         if ( count( $action_parts ) === 1 )
         {// (There is only the verb)
             // (Getting the values)
-            self::$subject = '';
-            self::$verb    = $action_parts[0];
+            $this->subject = '';
+            $this->verb    = $action_parts[0];
         }
         else
         {// (There are subject and verb)
             // (Getting the values)
-            self::$subject = $action_parts[0];
-            self::$verb    = $action_parts[1];
+            $this->subject = $action_parts[0];
+            $this->verb    = $action_parts[1];
         }
 
 
 
         // (Getting the value)
-        self::$input = $input;
+        $this->input = $input;
 
 
 
         // (Setting the value)
-        self::$valid = true;
+        $this->valid = true;
     }
 
 
@@ -127,6 +114,63 @@ class Request extends \Solenoid\HTTP\Request
 
         // Returning the value
         return self::$instance;
+    }
+
+
+
+    # Returns [self]
+    public function verify (string $token)
+    {
+        if ( !$this->valid ) return $this;
+
+
+
+        // (Getting the value)
+        $auth_token = $this->headers['Auth-Token'];
+
+        if ( !isset( $auth_token ) )
+        {// Match failed
+            // (Setting the value)
+            $this->valid = false;
+
+
+
+            // (Sending the response)
+            Server::send( new Response( new Status(400), [], [ 'error' => [ 'message' => 'RPC :: Token is required' ] ]) );
+
+
+
+            // Returning the value
+            return $this;
+        }
+
+
+
+        if ( !hash_equals( $token, $auth_token ) )
+        {// Match failed
+            // (Setting the value)
+            $this->valid = false;
+
+
+
+            // (Sending the response)
+            Server::send( new Response( new Status(401), [], [ 'error' => [ 'message' => 'RPC :: Client is not authorized' ] ] ) );
+
+
+
+            // Returning the value
+            return $this;
+        }
+
+
+
+        // (Setting the value)
+        $this->valid = true;
+
+
+
+        // Returning the value
+        return $this;
     }
 
 
