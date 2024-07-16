@@ -18,11 +18,11 @@ class Request extends \Solenoid\HTTP\Request
 
 
 
-    public static bool      $valid;
+    public static bool       $valid;
 
-    public static string    $subject;
-    public static string    $verb;
-    public static \stdClass $input;
+    public static string     $subject;
+    public static string     $verb;
+    public static ?\stdClass $input;
 
 
 
@@ -68,7 +68,7 @@ class Request extends \Solenoid\HTTP\Request
 
 
         // (Getting the value)
-        $input = ( $this->body === '' ) ? [] : json_decode( $this->body );
+        $input = ( $this->body === '' ) ? null : json_decode( $this->body );
 
         if ( $input === null )
         {// (Unable to decode the body as JSON)
