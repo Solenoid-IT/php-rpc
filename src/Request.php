@@ -118,59 +118,40 @@ class Request extends \Solenoid\HTTP\Request
 
 
 
-    # Returns [self]
+    # Returns [bool]
     public function verify (string $token)
     {
-        if ( !$this->valid ) return $this;
-
-
-
         // (Getting the value)
         $auth_token = $this->headers['Auth-Token'];
 
         if ( !isset( $auth_token ) )
         {// Match failed
-            // (Setting the value)
-            $this->valid = false;
-
-
-
             // (Sending the response)
             Server::send( new Response( new Status(400), [], [ 'error' => [ 'message' => 'RPC :: Token is required' ] ]) );
 
 
 
             // Returning the value
-            return $this;
+            return false;
         }
 
 
 
         if ( !hash_equals( $token, $auth_token ) )
         {// Match failed
-            // (Setting the value)
-            $this->valid = false;
-
-
-
             // (Sending the response)
             Server::send( new Response( new Status(401), [], [ 'error' => [ 'message' => 'RPC :: Client is not authorized' ] ] ) );
 
 
 
             // Returning the value
-            return $this;
+            return false;
         }
 
 
 
-        // (Setting the value)
-        $this->valid = true;
-
-
-
         // Returning the value
-        return $this;
+        return true;
     }
 
 
