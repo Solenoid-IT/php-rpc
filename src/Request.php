@@ -7,14 +7,16 @@ namespace Solenoid\RPC;
 
 
 use \Solenoid\HTTP\Server;
+use \Solenoid\HTTP\Request as HTTPRequest;
 use \Solenoid\HTTP\Response;
 use \Solenoid\HTTP\Status;
 
 
 
-class Request extends \Solenoid\HTTP\Request
+class Request
 {
-    private static self $instance;
+    private static self        $instance;
+    private static HTTPRequest $request;
 
 
 
@@ -29,12 +31,12 @@ class Request extends \Solenoid\HTTP\Request
     # Returns [self]
     private function __construct ()
     {
-        // (Calling the function)
-        parent::fetch();
+        // (Getting the value)
+        self::$request = HTTPRequest::fetch();
 
 
 
-        if ( $this->method !== 'RPC' )
+        if ( self::$request->method !== 'RPC' )
         {// Match failed
             // (Setting the value)
             $this->valid = false;
@@ -50,7 +52,7 @@ class Request extends \Solenoid\HTTP\Request
 
 
         // (Getting the value)
-        $action = $this->headers['Action'];
+        $action = self::$request->headers['Action'];
 
         if ( !isset( $action ) )
         {// Value not found
@@ -68,7 +70,7 @@ class Request extends \Solenoid\HTTP\Request
 
 
         // (Getting the value)
-        $input = ( $this->body === '' ) ? null : json_decode( $this->body );
+        $input = ( self::$request->body === '' ) ? null : json_decode( self::$request->body );
 
 
 
@@ -122,7 +124,7 @@ class Request extends \Solenoid\HTTP\Request
     public function verify (string $token)
     {
         // (Getting the value)
-        $auth_token = $this->headers['Auth-Token'];
+        $auth_token = self::$request->headers['Auth-Token'];
 
         if ( !isset( $auth_token ) )
         {// Match failed
