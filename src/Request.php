@@ -28,6 +28,153 @@ class Request
 
 
 
+    # Returns [stdClass|null]
+    private static function parse_input (string $body, string $content_type)
+    {
+        if ( $body === '' ) return null;
+
+
+
+        // (Setting the value)
+        $value = null;
+
+        switch ( $content_type )
+        {
+            case 'application/json':
+                // (Getting the value)
+                $value = json_decode( $body );
+            break;
+
+            case 'multipart/form-data':
+                // (Setting the value)
+                $value = [];
+
+
+
+                // (Getting the value)
+                $delimiter = substr( $body, 0, strpos( $body, "\r\n" ) );
+
+
+
+                // (Getting the value)
+                $parts = explode( "$delimiter\r\n", $body );
+
+                for ( $i = 1; $i < count( $parts ); $i++ )
+                {// Iterating each index
+                    // (Getting the value)
+                    $part = $parts[$i];
+
+                    // (Getting the values)
+                    $headers = explode( "\r\n\r\n", $part );
+                    $body    = array_pop( $headers );
+
+
+
+                    // (Setting the values)
+                    $name     = null;
+                    $filename = null;
+
+
+
+                    foreach ( $headers as $header )
+                    {// Processing each entry
+                        // (Getting the values)
+                        [ $k, $v ] = explode( $header, ': ', 2 );
+
+                        if ( $k === 'Content-Disposition' )
+                        {// Match OK
+                            // (Getting the value)
+                            $p = explode( '; ', $v );
+
+                            if ( $p[0] === 'form-data' )
+                            {// Match OK
+                                // (Getting the value)
+                                $pp = explode( '=', $p[1] );
+
+                                if ( $pp[0] === 'name' )
+                                {// Match OK
+                                    // (Getting the value)
+                                    $name = trim( $pp[1], " \n\r\t\v\0\"" );
+
+
+
+                                    if ( isset( $p[2] ) )
+                                    {// Value found
+                                        // (Getting the value)
+                                        $ppp = explode( '=', $p[2] );
+
+                                        if ( $ppp[0] === 'filename' )
+                                        {// Match OK
+                                            // (Getting the value)
+                                            $filename = trim( $ppp[1], " \n\r\t\v\0\"" );
+                                        }
+                                    }
+
+
+
+                                    if ( $name )
+                                    {// Value found
+                                        // (Getting the value)
+                                        $v = [];
+
+
+
+                                        // (Setting the value)
+                                        $v = new \stdClass();
+
+                                        $v->headers = $headers;
+                                        $v->body    = $body;
+
+
+
+                                        if ( $filename )
+                                        {// Value found
+                                            // (Appending the value)
+                                            $v->filename = $filename;
+
+
+
+                                            // (Appending the value)
+                                            $value[ $name ][] = $v;
+                                        }
+                                        else
+                                        {// Value not found
+                                            // (Getting the value)
+                                            $value[ $name ] = $v;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+
+                // (Setting the value)
+                $v = new \stdClass();
+
+                foreach ( $value as $k => $v )
+                {// Processing each entry
+                    // (Getting the value)
+                    $v->{ $k } = $v;
+                }
+
+
+
+                // (Getting the value)
+                $value = $v;
+            break;
+        }
+
+
+
+        // Returning the value
+        return $value;
+    }
+
+
+
     # Returns [self]
     private function __construct ()
     {
@@ -70,7 +217,25 @@ class Request
 
 
         // (Getting the value)
-        $input = ( self::$request->body === '' ) ? null : json_decode( self::$request->body );
+        $content_type = self::$request->headers['Content-Type'];
+
+        if ( !isset( $content_type ) )
+        {// Value not found
+            // (Setting the value)
+            $this->valid = false;
+
+
+
+            // Returning the value
+            return
+                Server::send( new Response( new Status(400), [], [ 'error' => [ 'message' => 'RPC :: Content-Type is required' ] ]) )
+            ;
+        }
+
+
+
+        // (Getting the value)
+        $input = self::parse_input( self::$request->body, $content_type );
 
 
 
