@@ -152,7 +152,7 @@ class Request
                 foreach ( $value as $k => $v )
                 {// Processing each entry
                     // (Getting the value)
-                    $val->{ $k } = is_array($v) && count($v) === 0 ? $v[0] : $v;
+                    $val->{ $k } = is_array($v) && count($v) === 1 ? $v[0] : $v;
                 }
 
 
