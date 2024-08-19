@@ -79,7 +79,7 @@ class Request
                     foreach ( $headers as $header )
                     {// Processing each entry
                         // (Getting the values)
-                        [ $k, $v ] = explode( $header, ': ', 2 );
+                        [ $k, $v ] = explode( ': ', $header, 2 );
 
                         if ( $k === 'Content-Disposition' )
                         {// Match OK
