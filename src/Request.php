@@ -152,18 +152,18 @@ class Request
 
 
                 // (Setting the value)
-                $v = new \stdClass();
+                $val = new \stdClass();
 
                 foreach ( $value as $k => $v )
                 {// Processing each entry
                     // (Getting the value)
-                    $v->{ $k } = $v;
+                    $val->{ $k } = $v;
                 }
 
 
 
                 // (Getting the value)
-                $value = $v;
+                $value = $val;
             break;
         }
 
