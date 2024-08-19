@@ -65,8 +65,8 @@ class Request
                     $part = $parts[$i];
 
                     // (Getting the values)
-                    $headers = explode( "\r\n", $part );
-                    $body    = array_pop( $headers );
+                    [ $headers, $body ] = explode( "\r\n\r\n", $part );
+                    $headers            = explode( "\r\n", $headers );
 
 
 
