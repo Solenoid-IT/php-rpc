@@ -131,17 +131,12 @@ class Request
                                         {// Value found
                                             // (Appending the value)
                                             $v->filename = $filename;
-
-
-
-                                            // (Appending the value)
-                                            $value[ $name ][] = $v;
                                         }
-                                        else
-                                        {// Value not found
-                                            // (Getting the value)
-                                            $value[ $name ] = $v;
-                                        }
+
+
+
+                                        // (Appending the value)
+                                        $value[ $name ][] = $v;
                                     }
                                 }
                             }
@@ -157,7 +152,7 @@ class Request
                 foreach ( $value as $k => $v )
                 {// Processing each entry
                     // (Getting the value)
-                    $val->{ $k } = $v;
+                    $val->{ $k } = is_array($v) && count($v) === 0 ? $v[0] : $v;
                 }
 
 
