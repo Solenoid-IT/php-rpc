@@ -176,7 +176,7 @@ class FormData
 
         foreach ( $this->content as $k => $v )
         {// Processing each entry
-            // (Appending the value)
+            // (Appending the values)
             $value .= str_pad( $boundary, 59, '-', STR_PAD_LEFT );
             $value .= "\r\n";
             
@@ -189,6 +189,11 @@ class FormData
             // (Appending the value)
             $value .= "\r\n$v->body";
         }
+
+
+
+        // (Appending the values)
+        $value .= str_pad( $boundary, 59, '-', STR_PAD_LEFT ) . '--';
 
 
 
