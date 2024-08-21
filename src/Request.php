@@ -26,7 +26,7 @@ class Request
 
     public string $subject;
     public string $verb;
-    public array  $input;
+    public ?array $input;
 
 
 
