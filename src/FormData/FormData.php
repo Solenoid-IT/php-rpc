@@ -2,7 +2,7 @@
 
 
 
-namespace Solenoid\RPC;
+namespace Solenoid\RPC\FormData;
 
 
 

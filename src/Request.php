@@ -11,6 +11,8 @@ use \Solenoid\HTTP\Request as HTTPRequest;
 use \Solenoid\HTTP\Response;
 use \Solenoid\HTTP\Status;
 
+use \Solenoid\RPC\FormData\Part;
+
 
 
 class Request
@@ -20,15 +22,15 @@ class Request
 
 
 
-    public bool       $valid;
+    public bool   $valid;
 
-    public string     $subject;
-    public string     $verb;
-    public ?\stdClass $input;
+    public string $subject;
+    public string $verb;
+    public array  $input;
 
 
 
-    # Returns [stdClass|null]
+    # Returns [array|null]
     private static function parse_input (string $body, string $content_type)
     {
         if ( $body === '' ) return null;
@@ -42,7 +44,7 @@ class Request
         {
             case 'application/json':
                 // (Getting the value)
-                $value = json_decode( $body );
+                $value = json_decode( $body, true );
             break;
 
             case 'multipart/form-data':
@@ -70,89 +72,30 @@ class Request
 
 
 
-                    // (Setting the values)
-                    $name     = null;
-                    $filename = null;
+                    // (Getting the value)
+                    $part = new Part( $headers, $body );
 
 
 
-                    foreach ( $headers as $header )
-                    {// Processing each entry
-                        // (Getting the values)
-                        [ $k, $v ] = explode( ': ', $header, 2 );
+                    // (Getting the value)
+                    $part_name = $part->get_name();
 
-                        if ( $k === 'Content-Disposition' )
-                        {// Match OK
-                            // (Getting the value)
-                            $p = explode( '; ', $v );
-
-                            if ( $p[0] === 'form-data' )
-                            {// Match OK
-                                // (Getting the value)
-                                $pp = explode( '=', $p[1] );
-
-                                if ( $pp[0] === 'name' )
-                                {// Match OK
-                                    // (Getting the value)
-                                    $name = trim( $pp[1], " \n\r\t\v\0\"" );
-
-
-
-                                    if ( isset( $p[2] ) )
-                                    {// Value found
-                                        // (Getting the value)
-                                        $ppp = explode( '=', $p[2] );
-
-                                        if ( $ppp[0] === 'filename' )
-                                        {// Match OK
-                                            // (Getting the value)
-                                            $filename = trim( $ppp[1], " \n\r\t\v\0\"" );
-                                        }
-                                    }
-
-
-
-                                    if ( $name )
-                                    {// Value found
-                                        // (Getting the value)
-                                        $v = [];
-
-
-
-                                        // (Setting the value)
-                                        $v = new \stdClass();
-
-                                        $v->headers = $headers;
-                                        $v->body    = $body;
-
-
-
-                                        if ( $filename )
-                                        {// Value found
-                                            // (Appending the value)
-                                            $v->filename = $filename;
-                                        }
-
-
-
-                                        // (Appending the value)
-                                        $value[ $name ][] = $v;
-                                    }
-                                }
-                            }
-                        }
+                    if ( $part_name )
+                    {// Value found
+                        // (Appending the value)
+                        $value[ $part_name ][] = new Part( $headers, $body );
                     }
                 }
 
 
 
                 // (Setting the value)
-                $val = new \stdClass();
+                $val = [];
 
                 foreach ( $value as $k => $v )
                 {// Processing each entry
                     // (Getting the value)
-                    $val->{ $k } = is_array($v) && count($v) === 1 ? $v[0] : $v;
+                    $val[$k] = count($v) === 1 ? $v[0] : $v;
                 }
 
 
@@ -230,18 +173,13 @@ class Request
 
 
         // (Getting the value)
-        $input = self::parse_input( self::$request->body, $content_type );
-
-
-
-        // (Getting the value)
         $action_parts = explode( '::', $action );
 
         if ( count( $action_parts ) === 1 )
         {// (There is only the verb)
             // (Getting the values)
             $this->subject = '';
-            $this->verb    = $action_parts[0];
+            $this->verb    = $action;
         }
         else
         {// (There are subject and verb)
@@ -253,7 +191,7 @@ class Request
 
 
         // (Getting the value)
-        $this->input = $input;
+        $this->input = self::parse_input( self::$request->body, $content_type );
 
 
 
