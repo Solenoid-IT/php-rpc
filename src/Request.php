@@ -7,7 +7,7 @@ namespace Solenoid\RPC;
 
 
 use \Solenoid\HTTP\Server;
-use \Solenoid\HTTP\Request as HTTPRequest;
+use \Solenoid\HTTP\Request as HttpRequest;
 use \Solenoid\HTTP\Response;
 use \Solenoid\HTTP\Status;
 
@@ -18,7 +18,7 @@ use \Solenoid\RPC\FormData\Part;
 class Request
 {
     private static self        $instance;
-    private static HTTPRequest $request;
+    private static HttpRequest $request;
 
 
 
@@ -26,90 +26,6 @@ class Request
 
     public string $subject;
     public string $verb;
-    public ?array $input;
-
-
-
-    # Returns [array|null]
-    private static function parse_input (string $body, string $content_type)
-    {
-        if ( $body === '' ) return null;
-
-
-
-        // (Setting the value)
-        $value = null;
-
-        switch ( $content_type )
-        {
-            case 'application/json':
-                // (Getting the value)
-                $value = json_decode( $body, true );
-            break;
-
-            case 'multipart/form-data':
-                // (Setting the value)
-                $value = [];
-
-
-
-                // (Getting the value)
-                $delimiter = substr( $body, 0, strpos( $body, "\r\n" ) );
-
-
-
-                // (Getting the value)
-                $parts = explode( "$delimiter\r\n", $body );
-
-                for ( $i = 1; $i < count( $parts ); $i++ )
-                {// Iterating each index
-                    // (Getting the value)
-                    $part = $parts[$i];
-
-                    // (Getting the values)
-                    [ $headers, $body ] = explode( "\r\n\r\n", $part );
-                    $headers            = explode( "\r\n", $headers );
-
-
-
-                    // (Getting the value)
-                    $part = new Part( $headers, $body );
-
-
-
-                    // (Getting the value)
-                    $part_name = $part->get_name();
-
-                    if ( $part_name )
-                    {// Value found
-                        // (Appending the value)
-                        $value[ $part_name ][] = new Part( $headers, $body );
-                    }
-                }
-
-
-
-                // (Setting the value)
-                $val = [];
-
-                foreach ( $value as $k => $v )
-                {// Processing each entry
-                    // (Getting the value)
-                    $val[$k] = count($v) === 1 ? $v[0] : $v;
-                }
-
-
-
-                // (Getting the value)
-                $value = $val;
-            break;
-        }
-
-
-
-        // Returning the value
-        return $value;
-    }
 
 
 
@@ -117,7 +33,7 @@ class Request
     private function __construct ()
     {
         // (Getting the value)
-        self::$request = HTTPRequest::fetch();
+        self::$request = HttpRequest::fetch();
 
 
 
@@ -190,11 +106,6 @@ class Request
 
 
 
-        // (Getting the value)
-        $this->input = self::parse_input( self::$request->body, $content_type );
-
-
-
         // (Setting the value)
         $this->valid = true;
     }
@@ -252,6 +163,92 @@ class Request
 
         // Returning the value
         return true;
+    }
+
+
+
+    # Returns [mixed]
+    public function parse_body ()
+    {
+        // (Getting the value)
+        $body = &self::$request->body;
+
+        if ( $body === '' ) return $body;
+
+
+
+        // (Setting the value)
+        $value = '';
+
+        switch ( self::$request->headers['Content-Type'] )
+        {
+            case 'application/json':
+                // (Getting the value)
+                $value = json_decode( $body, true );
+            break;
+
+            case 'multipart/form-data':
+                // (Setting the value)
+                $value = [];
+
+
+
+                // (Getting the value)
+                $delimiter = substr( $body, 0, strpos( $body, "\r\n" ) );
+
+
+
+                // (Getting the value)
+                $parts = explode( "$delimiter\r\n", $body );
+
+                for ( $i = 1; $i < count( $parts ); $i++ )
+                {// Iterating each index
+                    // (Getting the value)
+                    $part = $parts[$i];
+
+                    // (Getting the values)
+                    [ $headers, $body ] = explode( "\r\n\r\n", $part );
+                    $headers            = explode( "\r\n", $headers );
+
+
+
+                    // (Getting the value)
+                    $part = new Part( $headers, $body );
+
+
+
+                    // (Getting the value)
+                    $part_name = $part->get_name();
+
+                    if ( $part_name )
+                    {// Value found
+                        // (Appending the value)
+                        $value[ $part_name ][] = new Part( $headers, $body );
+                    }
+                }
+
+
+
+                // (Setting the value)
+                $val = [];
+
+                foreach ( $value as $k => $v )
+                {// Processing each entry
+                    // (Getting the value)
+                    $val[$k] = count($v) === 1 ? $v[0] : $v;
+                }
+
+
+
+                // (Getting the value)
+                $value = $val;
+            break;
+        }
+
+
+
+        // Returning the value
+        return $value;
     }
 
 
