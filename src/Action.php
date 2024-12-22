@@ -15,6 +15,11 @@ use \Solenoid\HTTP\Status;
 
 class Action
 {
+    public static string $class;
+    public static string $method;
+
+
+
     # Returns [void]
     public static function run (string $ns_prefix)
     {
@@ -50,6 +55,11 @@ class Action
 
 
         // (Getting the value)
+        self::$class = $class;
+
+
+
+        // (Getting the value)
         $class = $ns_prefix . str_replace( '/', '\\', $class );
 
         if ( !class_exists( $class ) )
@@ -69,6 +79,11 @@ class Action
                 Server::send( new Response( new Status(400), [], [ 'error' => [ 'message' => 'RPC :: Action-Method not found' ] ] ) )
             ;
         }
+
+
+
+        // (Getting the value)
+        self::$method = $method;
 
 
 
