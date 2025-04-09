@@ -7,7 +7,6 @@ namespace Solenoid\RPC;
 
 
 use \Solenoid\HTTP\Server;
-use \Solenoid\HTTP\Request;
 use \Solenoid\HTTP\Response;
 use \Solenoid\HTTP\Status;
 
@@ -21,27 +20,8 @@ class Action
 
 
     # Returns [void]
-    public static function run (string $ns_prefix, ?string $id = null)
+    public static function run (string $ns_prefix, string $id)
     {
-        // (Getting the value)
-        $request = Request::fetch();
-
-
-
-        if ( !$id )
-        {// Value not found
-            // (Getting the value)
-            $id = $request->headers['Action'];
-
-            if ( !$id )
-            {// Value not found
-                // Returning the value
-                return Server::send( new Response( new Status(400), [], [ 'error' => [ 'message' => 'RPC :: Action is required' ] ] ) );
-            }
-        }
-
-
-
         // (Getting the values)
         [ $class, $method ] = explode( '.', $id, 2 );
 
