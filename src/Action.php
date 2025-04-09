@@ -21,28 +21,29 @@ class Action
 
 
     # Returns [void]
-    public static function run (string $ns_prefix)
+    public static function run (string $ns_prefix, ?string $id = null)
     {
         // (Getting the value)
         $request = Request::fetch();
 
 
 
-        // (Getting the value)
-        $action = $request->headers['Action'];
-
-        if ( !$action )
+        if ( !$id )
         {// Value not found
-            // Returning the value
-            return
-                Server::send( new Response( new Status(400), [], [ 'error' => [ 'message' => 'RPC :: Action is required' ] ] ) )
-            ;
+            // (Getting the value)
+            $id = $request->headers['Action'];
+
+            if ( !$id )
+            {// Value not found
+                // Returning the value
+                return Server::send( new Response( new Status(400), [], [ 'error' => [ 'message' => 'RPC :: Action is required' ] ] ) );
+            }
         }
 
 
 
         // (Getting the values)
-        [ $class, $method ] = explode( '.', $action, 2 );
+        [ $class, $method ] = explode( '.', $id, 2 );
 
         if ( !$method )
         {// Value not found
