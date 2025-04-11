@@ -81,6 +81,15 @@ class Action
         // Returning the value
         return $response;
     }
+
+
+
+    # Returns [string]
+    public static function fetch ()
+    {
+        // Returning the value
+        return self::$class . '.' . self::$method;
+    }
 }
 
 
